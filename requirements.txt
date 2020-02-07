@@ -1,4 +1,6 @@
+future (0.18.2)
 pip (9.0.1)
 pkg-resources (0.0.0)
 pygame (1.9.6)
+pyglet (1.4.10)
 setuptools (39.0.1)
