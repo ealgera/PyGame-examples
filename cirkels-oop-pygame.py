@@ -52,7 +52,7 @@ class Sketch():
     def __init__(self):
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.background =pygame.Surface((self.screen.get_width(), self.screen.get_height())) # Achtergrond met afmetingen van 'screen'
-        pygame.display.set_caption("Een Window")
+        pygame.display.set_caption(f"Venster met {AANTAL_CIRKELS} sprites")
 
         self.cirkels = [Cirkel() for x in range(AANTAL_CIRKELS)]
         self.all_sprites = pygame.sprite.Group()
