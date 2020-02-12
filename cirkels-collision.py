@@ -10,8 +10,8 @@ HEIGHT = 600
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 STEP = 1
-AANTAL_CIRKELS = 100
-FRAMERATE = 60
+AANTAL_CIRKELS = 150
+FRAMERATE = 30
 
 pygame.init()
 
@@ -30,7 +30,7 @@ class Cirkel(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
 
-        self.font = pygame.font.SysFont("Arial", 24)       # Font van text op sprite
+        self.font = pygame.font.SysFont("Arial", 16)       # Font van text op sprite
         self.text_surf = self.font.render(text, 1, WHITE)  # Surface van de text
         W = self.text_surf.get_width()
         H = self.text_surf.get_height()
@@ -64,26 +64,32 @@ class Sketch():
         self.background =pygame.Surface((self.screen.get_width(), self.screen.get_height())) # Achtergrond met afmetingen van 'screen'
         self.col = 0
         
-        #self.cirkels = [Cirkel() for x in range(AANTAL_CIRKELS)]
-        c1 = Cirkel(100, 100, 20, "1")
-        c2 = Cirkel(200, 200, 20, "2")
-        c3 = Cirkel(300, 300, 20, "3")
-        c4 = Cirkel(400, 400, 20, "4")
-        c5 = Cirkel(500, 500, 20, "5")
-        self.objects = [c1 , c2, c3, c4, c5]
-        self.all_sprites = pygame.sprite.Group(c1 , c2, c3, c4, c5)
+        self.cirkels = [Cirkel(randint(100,500), randint(200,500), randint(10,20), str(x) ) for x in range(AANTAL_CIRKELS)]
+        #c1 = Cirkel(100, 100, 20, "1")
+        #c2 = Cirkel(200, 200, 20, "2")
+        #c3 = Cirkel(300, 300, 20, "3")
+        #c4 = Cirkel(400, 400, 20, "4")
+        #c5 = Cirkel(500, 500, 20, "5")
+        #self.objects = [c1 , c2, c3, c4, c5]
+        self.objects = self.cirkels
+        self.all_sprites = pygame.sprite.Group(self.cirkels)
 
-        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} sprites")
+        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} sprites en collision-detection")
     
     def detect_collisions(self):
         for a_sprite in self.all_sprites:
             other_sprites = self.all_sprites.copy()
-            other_sprites.remove(a_sprite)
-            sprite_coll = pygame.sprite.spritecollideany(a_sprite, other_sprites)
+            other_sprites.remove(a_sprite)  # Zodat other_sprites alle sprites zijn minus a_sprite
+            sprite_coll = pygame.sprite.spritecollideany(a_sprite, other_sprites) # Bepaal collision met a_sprite
             if sprite_coll:
-                self.col += 1
-                print(f"{self.col}) - Collision: {a_sprite.text} met {sprite_coll.text}")
-                pygame.gfxdraw.filled_circle(a_sprite.image, a_sprite.radius, a_sprite.radius, a_sprite.radius, (255,0,0))
+                #self.col += 1
+                #print(f"{self.col}) - Collision: {a_sprite.text} met {sprite_coll.text}")
+                pygame.gfxdraw.filled_circle(a_sprite.image, a_sprite.radius, a_sprite.radius, a_sprite.radius, (255,0,0))  # Rode sprite
+            else:
+                pygame.gfxdraw.filled_circle(a_sprite.image, a_sprite.radius, a_sprite.radius, a_sprite.radius, a_sprite.color)
+            W = a_sprite.text_surf.get_width()
+            H = a_sprite.text_surf.get_height()
+            a_sprite.image.blit(a_sprite.text_surf, [a_sprite.radius - W/2, a_sprite.radius - H/2])  # 'Blit' de text in het middem van de sprite.
 
     def run(self):
         clock = pygame.time.Clock()
