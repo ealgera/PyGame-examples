@@ -57,11 +57,11 @@ class Cirkel(pygame.sprite.Sprite):
 
         self.rect.center = (self.pos.x, self.pos.y)
 
-    def draw(self, screen):
+    #def draw(self, screen):
         #v = other.pos - self.pos
         #pygame.gfxdraw.filled_circle(screen, int(self.pos.x), int(self.pos.y), self.radius, self.color)
     #    aaline(surface, color, start_pos, end_pos)
-        pass
+    #    pass
 
 class Sketch():
     def __init__(self):
@@ -84,8 +84,9 @@ class Sketch():
                 #self.col += 1
                 #print(f"{self.col}) - Collision: {a_sprite.text} met {sprite_coll.text}")
                 pygame.gfxdraw.filled_circle(a_sprite.image, a_sprite.radius, a_sprite.radius, a_sprite.radius, (255,0,0))  # Rode sprite
-            else:
-                pygame.gfxdraw.filled_circle(a_sprite.image, a_sprite.radius, a_sprite.radius, a_sprite.radius, a_sprite.color)
+                self.all_sprites.remove(a_sprite)              
+            #else:
+            #    pygame.gfxdraw.filled_circle(a_sprite.image, a_sprite.radius, a_sprite.radius, a_sprite.radius, a_sprite.color)
             W = a_sprite.text_surf.get_width()
             H = a_sprite.text_surf.get_height()
             a_sprite.image.blit(a_sprite.text_surf, [a_sprite.radius - W/2, a_sprite.radius - H/2])  # 'Blit' de text in het middem van de sprite.
@@ -99,27 +100,27 @@ class Sketch():
                     pygame.quit()
                     quit()
 
-            for cirkel in self.cirkels:
-                pygame.gfxdraw.filled_circle(cirkel.image, int(cirkel.pos.x), int(cirkel.pos.y), cirkel.radius, BLACK)  # Clear Sprite
-                #self.dirty_rects.append(cirkel.rect)
-                cirkel.update()
-                cirkel.draw(self.screen)
-                self.dirty_rects.append(cirkel.rect)
-            
-            print(len(self.dirty_rects))
-            pygame.display.update(self.dirty_rects)
-            self.dirty_rects = []
+            #for cirkel in self.cirkels:
+            #    pygame.gfxdraw.filled_circle(cirkel.image, int(cirkel.pos.x), int(cirkel.pos.y), cirkel.radius, BLACK)  # Clear Sprite
+            #    #self.dirty_rects.append(cirkel.rect)
+            #    cirkel.update()
+            #    cirkel.draw(self.screen)
+            #    self.dirty_rects.append(cirkel.rect)
+            #
+            #print(len(self.dirty_rects))
+            #pygame.display.update(self.dirty_rects)
+            #self.dirty_rects = []
 
-            #self.all_sprites.update()          # Voer de .update methode uit voor iedere sprite in de sprites-Group
+            self.all_sprites.update()          # Voer de .update methode uit voor iedere sprite in de sprites-Group
             #self.one_sprite.update()
 
-            #self.detect_collisions()
+            self.detect_collisions()
 
-            #self.all_sprites.clear(self.screen, self.background)
+            self.all_sprites.clear(self.screen, self.background)
             #self.one_sprite.clear(self.screen, self.background)
             
 
-            #self.all_sprites.draw(self.screen) # 'Teken' alle sprites.
+            self.all_sprites.draw(self.screen) # 'Teken' alle sprites.
             #self.one_sprite.draw(self.screen)
 
             #for this_cirkel in self.cirkels:
@@ -127,7 +128,7 @@ class Sketch():
             #        if this_cirkel != other_cirkel:
             #            this_cirkel.draw(self.screen, other_cirkel)
 
-            #pygame.display.flip()
+            pygame.display.flip()
             clock.tick(FRAMERATE)
                 
 if __name__ == "__main__":
