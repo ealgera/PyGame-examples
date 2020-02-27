@@ -28,8 +28,8 @@ while True:
     v_m = pygame.Vector2(mouse_x, mouse_y)
 
     v_m = v_m - v_c   # Verschil
-    v_m = v_m.normalize()
-    v_m = v_m * 50
+    #v_m = v_m.normalize()
+    #v_m = v_m * 50
     #v_m = v_m * 0.5   # Vermenigvuldiging
 
     m = v_m.magnitude()
