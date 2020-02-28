@@ -13,12 +13,12 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED   = (255, 0, 0)
 STEP = 1
-AANTAL_CIRKELS = 2
+AANTAL_CIRKELS = 10
 FRAMERATE = 30
 VELOCITY = 0
 ACCELERATION = 0
 GRAVITY = math.Vector2(0, 0.3)
-WIND    = math.Vector2(0.3, 0)
+WIND    = math.Vector2(0.0, -0.0)
 
 pygame.init()
 
@@ -26,7 +26,7 @@ class Cirkel(pygame.sprite.Sprite):
     def __init__(self, x, y, r, text):
         pygame.sprite.Sprite.__init__(self)
 
-        self.mass   = randint(2, 6)
+        self.mass   = randint(2, 5)
         self.radius = self.mass * r
         self.pos    = math.Vector2(int(x), int(y))
         self.vel    = math.Vector2(int(randint(-1*VELOCITY, VELOCITY)), int(randint(-1*VELOCITY, VELOCITY)))
@@ -54,35 +54,36 @@ class Cirkel(pygame.sprite.Sprite):
         self.vectors = []  # Vectors wijzend naar andere objecten
 
     def apply_force(self, force):
-        #f = force / self.mass
-        f = self.mass / force
+        f = force / self.mass
         self.acc += f
-        print(f"Force: {force}, Mass: {self.mass}, F/M: {f}, acc: {self.acc}")
-        self.acc += f
+        #print(f"Force: {force}, Mass: {self.mass}, F/M: {f}, acc: {self.acc}")
 
     def update(self, sprites):
 
+        #print(f"Start X-pos: {round(self.pos.x, 1)} - ", end = "")
         self.vel += self.acc
         self.pos += self.vel
 
+        #print(f"vel: {self.vel} --> X-pos: {round(self.pos.x, 1)}, r={self.radius}")
+
+        if ((self.pos.x - self.radius) < 0):
+            self.vel += self.acc
+            self.vel.x = self.vel.x * -1
+        else:
+            if ((self.pos.x + self.radius) > WIDTH):
+                self.vel += self.acc
+                self.vel.x = self.vel.x * -1  #int(self.vel.x * -1)
+
+        if ((self.pos.y - self.radius) < 0):
+            #self.pos.y = self.radius
+            self.vel += self.acc
+            self.vel.y = self.vel.y * -1
+        else:
+            if ((self.pos.y + self.radius) > HEIGHT):
+                self.vel += self.acc
+                self.vel.y = self.vel.y * -1  #int(self.vel.y * -1)
+
         self.acc = self.acc * 0
-
-        if ((self.pos.x - self.radius) <= 0):
-            self.pos.x = self.radius
-            self.vel.x = int(self.vel.x * -1)
-        else:
-            if ((self.pos.x + self.radius) >= WIDTH):
-                self.pos.x = self.pos.x - self.radius
-                self.vel.x = int(self.vel.x * -1)
-
-        if ((self.pos.y - self.radius) <= 0):
-            self.pos.y = self.radius
-            self.vel.y = int(self.vel.y * -1)
-        else:
-            if ((self.pos.y + self.radius) >= HEIGHT):
-                self.pos.y = self.pos.y - self.radius
-                self.vel.y = int(self.vel.y * -1)
-
         self.rect.center = (self.pos.x, self.pos.y)
 
         #self.vectors = []
@@ -120,10 +121,10 @@ class Sketch():
         self.background =pygame.Surface((self.screen.get_width(), self.screen.get_height())) # Achtergrond met afmetingen van 'screen'
         self.col = 0
         
-        self.cirkels = [Cirkel(randint(0,WIDTH), (HEIGHT/2), randint(10,10), str(x) ) for x in range(1, AANTAL_CIRKELS+1)]
+        self.cirkels = [Cirkel((randint(0+100, WIDTH-100)), (HEIGHT/4), randint(10,10), str(x) ) for x in range(1, AANTAL_CIRKELS+1)]
         self.all_sprites = pygame.sprite.RenderUpdates(self.cirkels)
 
-        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} stuiterende sprites...")
+        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} sprites onder invloed van wind {WIND} en zwaartekracht {GRAVITY}")
     
     def detect_collisions(self):
         for a_sprite in self.all_sprites:
@@ -145,8 +146,11 @@ class Sketch():
                     quit()
             
             for sprite in self.all_sprites:
-                #sprite.apply_force(WIND)
-                sprite.apply_force(GRAVITY)
+                
+                #force_g = GRAVITY * sprite.mass
+                sprite.apply_force(GRAVITY * sprite.mass)
+                sprite.apply_force(WIND)
+                
                 sprite.update(self.all_sprites)
 
             #self.detect_collisions()
