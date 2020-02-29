@@ -17,9 +17,9 @@ AANTAL_CIRKELS = 10
 FRAMERATE = 30
 VELOCITY = 0
 ACCELERATION = 0
-GRAVITY = math.Vector2(0, 0.3)
-WIND    = math.Vector2(0.0, -0.0)
-FRICTION_COEF = 0.1
+GRAVITY = math.Vector2(0, 0.2)
+WIND    = math.Vector2(0.2, -0.3)
+FRICTION_COEF = 0.03
 
 pygame.init()
 
@@ -27,8 +27,8 @@ class Cirkel(pygame.sprite.Sprite):
     def __init__(self, x, y, r, text):
         pygame.sprite.Sprite.__init__(self)
 
-        self.mass   = randint(2, 5)
-        self.radius = self.mass * r
+        self.mass   = randint(2, 4)
+        self.radius = self.mass * r  # Hoe zwaarder, hoe groter
         self.pos    = math.Vector2(int(x), int(y))
         self.vel    = math.Vector2(int(randint(-1*VELOCITY, VELOCITY)), int(randint(-1*VELOCITY, VELOCITY)))
         self.acc    = math.Vector2(0, 0)
@@ -36,47 +36,38 @@ class Cirkel(pygame.sprite.Sprite):
         self.color  = (randint(0,255), randint(0,255), randint(0,255))
         self.text   = text
         self.collided = False
+        self.remove = False
 
-        self.image1  = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)  # Voor een standaard cirkel sprite
-        self.image2  = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)  # Voor een standaard rode cirkel sprite
-        self.rect    = self.image1.get_rect()  # Zelfde RECT voor image1 en image2
+        self.image  = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)  # Voor een standaard cirkel sprite
+        #self.image2  = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)  # Voor een standaard rode cirkel sprite
+        self.rect    = self.image.get_rect()  # Zelfde RECT voor image1 en image2
 
         self.font      = pygame.font.SysFont("Arial", 20)     # Font van text op sprite
         self.text_surf = self.font.render(text, 1, WHITE)  # Surface van de text
 
-        pygame.gfxdraw.filled_circle(self.image1, self.radius, self.radius, self.radius, self.color) # Standaard Sprite met gevulde cirkel
-        pygame.gfxdraw.filled_circle(self.image2, self.radius, self.radius, self.radius, RED)        # Sprite gevuld met rode cirkel
+        pygame.gfxdraw.filled_circle(self.image, self.radius, self.radius, self.radius, self.color) # Standaard Sprite met gevulde cirkel
+        #pygame.gfxdraw.filled_circle(self.image2, self.radius, self.radius, self.radius, RED)        # Sprite gevuld met rode cirkel
 
         W = self.text_surf.get_width()
         H = self.text_surf.get_height()
-        self.image1.blit(self.text_surf, [self.radius - W/2, self.radius - H/2])  # 'Blit' de text in het midden van de sprite.
-        self.image2.blit(self.text_surf, [self.radius - W/2, self.radius - H/2])  # 'Blit' de text in het midden van de sprite.
+        self.image.blit(self.text_surf, [self.radius - W/2, self.radius - H/2])  # 'Blit' de text in het midden van de sprite.
+        #self.image2.blit(self.text_surf, [self.radius - W/2, self.radius - H/2])  # 'Blit' de text in het midden van de sprite.
         
         self.vectors = []  # Vectors wijzend naar andere objecten
 
     def apply_force(self, force):
         f = force / self.mass
         self.acc += f
-        #print(f"Force: {force}, Mass: {self.mass}, F/M: {f}, acc: {self.acc}")
 
-    def update(self, sprites):
+    def update(self):
 
-        #print(f"Start X-pos: {round(self.pos.x, 1)} - ", end = "")
         self.vel += self.acc
         self.pos += self.vel
 
-        #print(f"vel: {self.vel}") # --> X-pos: {round(self.pos.x, 1)}, r={self.radius}")
-
-        if ((self.pos.x - self.radius) < 0):
-            self.vel += self.acc
-            self.vel.x = self.vel.x * -1
-        else:
-            if ((self.pos.x + self.radius) > WIDTH):
-                self.vel += self.acc
-                self.vel.x = self.vel.x * -1  #int(self.vel.x * -1)
+        if (self.pos.x - self.radius) > WIDTH:
+            self.remove = True
 
         if ((self.pos.y - self.radius) < 0):
-            #self.pos.y = self.radius
             self.vel += self.acc
             self.vel.y = self.vel.y * -1
         else:
@@ -99,7 +90,7 @@ class Cirkel(pygame.sprite.Sprite):
     def draw(self, screen):
 
         if self.collided:
-            screen.blit(self.image2, self.rect)   # Standaard sprite-image
+            screen.blit(self.image2, self.rect) # Standaard sprite-image
         else:
             screen.blit(self.image1, self.rect) # Rode sprite-image  
 
@@ -122,10 +113,10 @@ class Sketch():
         self.background =pygame.Surface((self.screen.get_width(), self.screen.get_height())) # Achtergrond met afmetingen van 'screen'
         self.col = 0
         
-        self.cirkels = [Cirkel((randint(0+100, WIDTH-100)), (HEIGHT/4), randint(10,10), str(x) ) for x in range(1, AANTAL_CIRKELS+1)]
+        self.cirkels = [Cirkel(0+45, (HEIGHT/2+randint(-50, 50)), randint(10,20), str(x) ) for x in range(1, AANTAL_CIRKELS+1)]
         self.all_sprites = pygame.sprite.RenderUpdates(self.cirkels)
 
-        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} sprites o.i.v. wind {WIND}, zwaartekracht {GRAVITY} en frictie {FRICTION_COEF}")
+        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} sprites o.i.v. wind {WIND} en frictie {FRICTION_COEF}")
     
     def detect_collisions(self):
         for a_sprite in self.all_sprites:
@@ -151,20 +142,27 @@ class Sketch():
                 sprite.apply_force(GRAVITY * sprite.mass)  # Vermenigvuldigen met Mass en delen door Mass in apply_force: heffen elkaar op.
                 sprite.apply_force(WIND)                   # Wordt in apply_force nog gedeeld door Mass.
 
-                if sprite.vel != [0,0]:   # Als sprite.vel 0 -> geen normalize() van 0.
-                    f_vel = (sprite.vel.normalize() * -1) * FRICTION_COEF
-                    sprite.apply_force(f_vel)
+                #if sprite.vel != [0,0]:   # Als sprite.vel 0 -> geen normalize() van 0.
+                #    f_vel = (sprite.vel.normalize() * -1) * FRICTION_COEF
+                #    sprite.apply_force(f_vel)
 
-                sprite.update(self.all_sprites)
+            #sprite.update(self.all_sprites)
+            self.all_sprites.update()
+            for sprite in self.all_sprites:
+                if sprite.remove:
+                    self.all_sprites.remove(sprite)
+                    #self.cirkels.append(Cirkel(0+45, (HEIGHT/2+randint(-50, 50)), randint(10,20), "A" ))
+                    self.all_sprites.add(Cirkel(0+45, (HEIGHT/2+randint(-50, 50)), randint(10,20), "A" ))
 
             #self.detect_collisions()
 
             self.screen.fill((BLACK))
 
-            for sprite in self.all_sprites:
-                sprite.draw(self.screen)
+            updated_rects = self.all_sprites.draw(self.screen)
+            #for sprite in self.all_sprites:
+            #    sprite.draw(self.screen)
 
-            pygame.display.update()
+            pygame.display.update(updated_rects)
             clock.tick(FRAMERATE)
                 
 if __name__ == "__main__":

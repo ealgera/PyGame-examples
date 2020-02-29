@@ -13,13 +13,13 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED   = (255, 0, 0)
 STEP = 1
-AANTAL_CIRKELS = 10
+AANTAL_CIRKELS = 1
 FRAMERATE = 30
 VELOCITY = 0
 ACCELERATION = 0
-GRAVITY = math.Vector2(0, 0.3)
-WIND    = math.Vector2(0.0, -0.0)
-FRICTION_COEF = 0.1
+GRAVITY = math.Vector2(0, 0.0)
+WIND    = math.Vector2(0.2, 0.0)
+FRICTION_COEF = 0.03
 
 pygame.init()
 
@@ -27,7 +27,7 @@ class Cirkel(pygame.sprite.Sprite):
     def __init__(self, x, y, r, text):
         pygame.sprite.Sprite.__init__(self)
 
-        self.mass   = randint(2, 5)
+        self.mass   = randint(3, 3)
         self.radius = self.mass * r
         self.pos    = math.Vector2(int(x), int(y))
         self.vel    = math.Vector2(int(randint(-1*VELOCITY, VELOCITY)), int(randint(-1*VELOCITY, VELOCITY)))
@@ -122,10 +122,10 @@ class Sketch():
         self.background =pygame.Surface((self.screen.get_width(), self.screen.get_height())) # Achtergrond met afmetingen van 'screen'
         self.col = 0
         
-        self.cirkels = [Cirkel((randint(0+100, WIDTH-100)), (HEIGHT/4), randint(10,10), str(x) ) for x in range(1, AANTAL_CIRKELS+1)]
+        self.cirkels = [Cirkel((100), (HEIGHT/2), randint(10,10), str(x) ) for x in range(1, AANTAL_CIRKELS+1)]
         self.all_sprites = pygame.sprite.RenderUpdates(self.cirkels)
 
-        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} sprites o.i.v. wind {WIND}, zwaartekracht {GRAVITY} en frictie {FRICTION_COEF}")
+        pygame.display.set_caption(f"Venster met {len(self.all_sprites.sprites())} sprites o.i.v. wind {WIND} en frictie {FRICTION_COEF}")
     
     def detect_collisions(self):
         for a_sprite in self.all_sprites:
@@ -148,11 +148,15 @@ class Sketch():
             
             for sprite in self.all_sprites:
                 
-                sprite.apply_force(GRAVITY * sprite.mass)  # Vermenigvuldigen met Mass en delen door Mass in apply_force: heffen elkaar op.
+                #sprite.apply_force(GRAVITY * sprite.mass)  # Vermenigvuldigen met Mass en delen door Mass in apply_force: heffen elkaar op.
                 sprite.apply_force(WIND)                   # Wordt in apply_force nog gedeeld door Mass.
 
                 if sprite.vel != [0,0]:   # Als sprite.vel 0 -> geen normalize() van 0.
-                    f_vel = (sprite.vel.normalize() * -1) * FRICTION_COEF
+                    if (sprite.pos.x >= 500) and (sprite.pos.x <= 750):
+                        f_vel = (sprite.vel.normalize() * -1) * FRICTION_COEF * 5.5
+                    else:
+                        f_vel = (sprite.vel.normalize() * -1) * FRICTION_COEF
+                    print(f_vel)
                     sprite.apply_force(f_vel)
 
                 sprite.update(self.all_sprites)
@@ -163,6 +167,10 @@ class Sketch():
 
             for sprite in self.all_sprites:
                 sprite.draw(self.screen)
+
+            pygame.gfxdraw.line(self.screen, 0, int(HEIGHT/2+30), WIDTH, int(HEIGHT/2+30), WHITE)
+            pygame.gfxdraw.line(self.screen, 500, int(HEIGHT/2+25), (500), int(HEIGHT/2+35), WHITE)
+            pygame.gfxdraw.line(self.screen, 500+250, int(HEIGHT/2+25), (500+250), int(HEIGHT/2+35), WHITE)
 
             pygame.display.update()
             clock.tick(FRAMERATE)
