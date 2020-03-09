@@ -6,7 +6,7 @@ from pygame import math
 
 from random import randint
 
-WIDTH  = 1024
+WIDTH  = 1600 #1024
 HEIGHT = 768
 
 BLACK = (0, 0, 0)
@@ -17,8 +17,8 @@ AANTAL_CIRKELS = 10
 FRAMERATE = 30
 VELOCITY = 0
 ACCELERATION = 0
-GRAVITY = math.Vector2(0, 0.2)
-WIND    = math.Vector2(0.2, -0.3)
+GRAVITY = math.Vector2(0, 0.3)
+WIND    = math.Vector2(0.1, -0.2)
 FRICTION_COEF = 0.03
 
 pygame.init()
@@ -59,13 +59,17 @@ class Cirkel(pygame.sprite.Sprite):
         f = force / self.mass
         self.acc += f
 
-    def update(self):
+    def update(self, sprites):
 
         self.vel += self.acc
         self.pos += self.vel
 
-        if (self.pos.x - self.radius) > WIDTH:
-            self.remove = True
+        if (self.pos.x - self.radius) > WIDTH:  # Verwijder sprite wanneer deze 'verdwijnt' aan de linkerrand
+            #self.remove = True
+            nr = self.text
+            sprites.remove(self)
+            #self.cirkels.append(Cirkel(0+45, (HEIGHT/2+randint(-50, 50)), randint(10,20), "A" ))
+            sprites.add(Cirkel(0+45, (HEIGHT/2+randint(-50, 50)), randint(10,20), nr))
 
         if ((self.pos.y - self.radius) < 0):
             self.vel += self.acc
@@ -89,10 +93,10 @@ class Cirkel(pygame.sprite.Sprite):
 
     def draw(self, screen):
 
-        if self.collided:
-            screen.blit(self.image2, self.rect) # Standaard sprite-image
-        else:
-            screen.blit(self.image1, self.rect) # Rode sprite-image  
+        #if self.collided:
+        screen.blit(self.image, self.rect) # Standaard sprite-image
+        #else:
+        #    screen.blit(self.image1, self.rect) # Rode sprite-image  
 
         #for vector in self.vectors:
         #    pygame.gfxdraw.line(screen, int(self.pos.x), int(self.pos.y), int(vector.x + self.pos.x), int(vector.y + self.pos.y), WHITE)
@@ -147,22 +151,17 @@ class Sketch():
                 #    sprite.apply_force(f_vel)
 
             #sprite.update(self.all_sprites)
-            self.all_sprites.update()
-            for sprite in self.all_sprites:
-                if sprite.remove:
-                    self.all_sprites.remove(sprite)
-                    #self.cirkels.append(Cirkel(0+45, (HEIGHT/2+randint(-50, 50)), randint(10,20), "A" ))
-                    self.all_sprites.add(Cirkel(0+45, (HEIGHT/2+randint(-50, 50)), randint(10,20), "A" ))
+            self.all_sprites.update(self.all_sprites)
 
             #self.detect_collisions()
 
-            self.screen.fill((BLACK))
+            #self.screen.fill((BLACK))
 
-            updated_rects = self.all_sprites.draw(self.screen)
-            #for sprite in self.all_sprites:
-            #    sprite.draw(self.screen)
+            #self.all_sprites.draw(self.screen)
+            for sprite in self.all_sprites:
+                sprite.draw(self.screen)
 
-            pygame.display.update(updated_rects)
+            pygame.display.update()
             clock.tick(FRAMERATE)
                 
 if __name__ == "__main__":
